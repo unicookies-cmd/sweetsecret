@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sweet Escape — Boarding Pass to Awareness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Mono:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+<style>
+
+/* ══════════════════════════════════════════════════════════════
+   DESIGN TOKENS — change these and the whole site updates
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  /* Dessert-as-destination palette: patisserie tones, printed like
+     travel infrastructure rather than candy-shop pastel. */
+  --paper:        #fcf6ee;   /* boarding-pass cream stock */
+  --paper-shadow: #f2e8d8;   /* shaded paper / card stock under */
+  --ink:          #3a2e2a;   /* espresso print ink */
+  --ink-soft:     #6b5a52;   /* secondary ink, lighter pressure */
+  --coral:        #e8746b;   /* wax-seal coral / "boarding now" stamp */
+  --coral-deep:   #c2453d;
+  --teal:         #2b6e63;   /* airline ticket teal-ink / pistachio */
+  --teal-deep:    #1c4a42;
+  --gold:         #c98f3a;   /* foil stamp / perforation gold */
+  --gold-pale:    #ead9b3;
+  --tan:          #f2d8c2;   /* croissant fill */
+  --tan-deep:     #d9b48c;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-script:  'Cormorant Garamond', Georgia, serif;
+  --font-data:    'Space Mono', monospace;
+}
+
+* , *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-script);
+  background: var(--paper-shadow);
+  color: var(--ink);
+  line-height: 1.6;
+}
+img { max-width: 100%; display: block; }
+
+.wrap { max-width: 760px; margin: 0 auto; padding: 0 1.25rem; }
+
+/* shared: dashed perforation rule, used between every section to keep
+   the "ticket stub" language running through the whole page */
+.perforation {
+  position: relative;
+  height: 0;
+  border-top: 2px dashed var(--gold-pale);
+}
+.perforation::before, .perforation::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  width: 20px;
+  height: 20px;
+  background: var(--paper-shadow);
+  border-radius: 50%;
+}
+.perforation::before { left: -10px; }
+.perforation::after { right: -10px; }
+
+.stamp-label {
+  font-family: var(--font-data);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 1 — HERO  /  THE BOARDING PASS
+   This is the signature element: a literal ticket. Edit content
+   via data-* attributes below, or restyle the .ticket card itself.
+   ══════════════════════════════════════════════════════════════ */
+#hero {
+  background: linear-gradient(180deg, #f7e0d2 0%, var(--paper-shadow) 55%);
+  padding: clamp(2.5rem, 6vw, 5rem) 1.25rem;
+  display: flex;
+  justify-content: center;
+}
+
+.ticket {
+  width: 100%;
+  max-width: 680px;
+  background: var(--paper);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px -20px rgba(58,46,42,0.35);
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  overflow: hidden;
+}
+
+.ticket-main {
+  padding: 2.25rem 2rem 2rem;
+  position: relative;
+  border-right: 2px dashed var(--gold-pale);
+}
+.ticket-main::after { /* perforation circles cut into the tear line */
+  content: '';
+  position: absolute;
+  top: -10px; right: -10px;
+  width: 20px; height: 20px;
+  background: var(--paper-shadow);
+  border-radius: 50%;
+}
+.ticket-main::before {
+  content: '';
+  position: absolute;
+  bottom: -10px; right: -10px;
+  width: 20px; height: 20px;
+  background: var(--paper-shadow);
+  border-radius: 50%;
+}
+
+.airline-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+}
+.airline-mark {
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  color: var(--teal-deep);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.airline-mark .glyph { font-size: 1rem; }
+.class-tag {
+  font-family: var(--font-data);
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  color: var(--coral-deep);
+  border: 1px solid var(--coral);
+  padding: 0.2rem 0.55rem;
+  border-radius: 3px;
+}
+
+.route {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.4rem;
+}
+.route-from, .route-to {
+  font-family: var(--font-data);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+}
+.route-arrow { color: var(--gold); font-size: 1rem; }
+
+.destination {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.1rem, 6vw, 3rem);
+  line-height: 1.05;
+  color: var(--ink);
+  margin-bottom: 0.15rem;
+}
+.destination em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--coral);
+}
+
+.passenger-line {
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+  margin: 0.9rem 0 1.6rem;
+  max-width: 380px;
+}
+
+.ticket-fields {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 1.5rem;
+}
+.field .stamp-label { color: var(--teal); margin-bottom: 0.3rem; }
+.field .value {
+  font-family: var(--font-data);
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.ticket-stub {
+  background: var(--tan);
+  padding: 2rem 1.25rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+}
+.stub-top { width: 100%; }
+.stub-top .stamp-label { color: var(--teal-deep); margin-bottom: 0.35rem; }
+.stub-gate {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.4rem;
+  color: var(--ink);
+  margin-bottom: 1.1rem;
+}
+.stub-divider { width: 60%; border-top: 1px dotted var(--tan-deep); margin: 0.9rem 0; }
+.stub-seat {
+  font-family: var(--font-data);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--coral-deep);
+  letter-spacing: 0.05em;
+}
+.stub-seat-label { font-size: 0.62rem; }
+
+.boarding-cta {
+  margin-top: 1.4rem;
+  display: inline-block;
+  background: var(--coral);
+  color: var(--paper);
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.7rem 1.1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.15s;
+}
+.boarding-cta:hover { background: var(--coral-deep); transform: translateY(-1px); }
+
+.hero-hint {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 2 — JOURNAL  /  IN-FLIGHT DECLARATION CARD
+   Styled like the little card tucked in a seat pocket — what are
+   you carrying with you, what are you declaring as you travel.
+   ══════════════════════════════════════════════════════════════ */
+#journal {
+  background: var(--paper-shadow);
+  padding: clamp(3rem, 6vw, 5rem) 1.25rem;
+}
+.declaration {
+  max-width: 680px;
+  margin: 0 auto;
+  background: var(--paper);
+  border: 1.5px solid var(--gold-pale);
+  border-radius: 10px;
+  padding: 2.5rem 2.25rem;
+  position: relative;
+}
+.declaration-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--gold-pale);
+  padding-bottom: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+.declaration-header .stamp-label { color: var(--gold); }
+.declaration-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-style: italic;
+  font-size: clamp(1.7rem, 4vw, 2.2rem);
+  color: var(--ink);
+}
+.declaration-formno {
+  font-family: var(--font-data);
+  font-size: 0.65rem;
+  color: var(--ink-soft);
+  text-align: right;
+  white-space: nowrap;
+}
+.declaration-intro {
+  font-style: italic;
+  color: var(--teal-deep);
+  margin-bottom: 1.5rem;
+  font-size: 1.05rem;
+}
+
+.declare-row {
+  display: flex;
+  gap: 0.85rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px dotted var(--tan-deep);
+  align-items: baseline;
+}
+.declare-row:last-child { border-bottom: none; }
+.declare-num {
+  font-family: var(--font-data);
+  font-size: 0.78rem;
+  color: var(--coral);
+  flex-shrink: 0;
+  width: 1.6rem;
+}
+.declare-row p {
+  font-family: var(--font-script);
+  font-size: 1.08rem;
+  color: var(--ink);
+  flex: 1;
+}
+.declare-line {
+  flex: 0 0 80px;
+  border-bottom: 1px solid var(--tan-deep);
+  height: 1px;
+  align-self: center;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 3 — CARDS  /  PASSPORT STAMPS (ports of call)
+   Three layovers in the Sweet Escape itinerary. Each one is a
+   stamped destination rather than a generic content card.
+   ══════════════════════════════════════════════════════════════ */
+#ports {
+  background: linear-gradient(180deg, var(--paper-shadow) 0%, #f4e9d6 100%);
+  padding: clamp(3rem, 6vw, 4.5rem) 1.25rem;
+}
+.ports-eyebrow {
+  text-align: center;
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 0.5rem;
+}
+.ports-title {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.8rem, 4.5vw, 2.4rem);
+  margin-bottom: 2.25rem;
+  color: var(--ink);
+}
+.ports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1.5rem;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.port-card {
+  background: var(--paper);
+  border: 1.5px solid var(--tan-deep);
+  border-radius: 10px;
+  padding: 1.5rem 1.25rem 1.75rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transform: rotate(var(--tilt, 0deg));
+}
+.port-card:nth-child(1) { --tilt: -1.2deg; }
+.port-card:nth-child(2) { --tilt: 0.8deg; }
+.port-card:nth-child(3) { --tilt: -0.6deg; }
+
+.port-stamp {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--coral);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin-bottom: 0.9rem;
+  color: var(--coral-deep);
+  background: var(--tan);
+}
+.port-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-style: italic;
+  font-size: 1.35rem;
+  color: var(--ink);
+  margin-bottom: 0.2rem;
+}
+.port-code {
+  font-family: var(--font-data);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: var(--teal);
+  margin-bottom: 0.85rem;
+}
+.port-prompt {
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: 0.98rem;
+  color: var(--ink-soft);
+}
+.port-fill-line {
+  width: 80%;
+  border-bottom: 1px dotted var(--tan-deep);
+  height: 1px;
+  margin-top: 0.9rem;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION 4 — CLOSING  /  ARRIVALS BOARD
+   You've landed. Framed as an arrivals/baggage-claim moment —
+   the journey's destination was always just noticing.
+   ══════════════════════════════════════════════════════════════ */
+#arrivals {
+  background: var(--ink);
+  color: var(--paper);
+  padding: clamp(3rem, 6vw, 5rem) 1.25rem 3.5rem;
+}
+.arrivals-eyebrow {
+  text-align: center;
+  font-family: var(--font-data);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.6rem;
+}
+.arrivals-title {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.9rem, 4.5vw, 2.5rem);
+  color: var(--paper);
+  margin-bottom: 2.25rem;
+}
+.arrivals-board {
+  max-width: 680px;
+  margin: 0 auto 2.25rem;
+  border: 1px solid rgba(252,246,238,0.18);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.arrivals-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  border-bottom: 1px solid rgba(252,246,238,0.12);
+}
+.arrivals-row:last-child { border-bottom: none; }
+.arrivals-status {
+  font-family: var(--font-data);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--coral);
+  padding: 1.1rem 1rem;
+  border-right: 1px solid rgba(252,246,238,0.12);
+  display: flex;
+  align-items: center;
+}
+.arrivals-text {
+  padding: 1.1rem 1.25rem;
+  font-family: var(--font-script);
+  font-size: 1.02rem;
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+}
+.arrivals-text.list-item::before {
+  content: '✓ ';
+  color: var(--teal);
+  font-family: var(--font-data);
+  margin-right: 0.4rem;
+}
+
+.arrivals-tagline {
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+  color: var(--gold-pale);
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 620px) {
+  .ticket { grid-template-columns: 1fr; }
+  .ticket-main { border-right: none; border-bottom: 2px dashed var(--gold-pale); }
+  .ticket-main::after, .ticket-main::before {
+    top: auto; right: 50%; transform: translateX(50%);
+  }
+  .ticket-main::after { bottom: -10px; top: auto; }
+  .ticket-main::before { display: none; }
+  .ticket-fields { grid-template-columns: 1fr 1fr; }
+  .arrivals-row { grid-template-columns: 80px 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 1 — HERO / BOARDING PASS
+     Edit copy via data-* attributes below.
+═══════════════════════════════════════════════════════════ -->
+<section id="hero"
+  data-airline="Sweet Escape Air"
+  data-class="First Class · Awareness"
+  data-from="HERE"
+  data-to="NOW"
+  data-destination-plain="Sweet"
+  data-destination-italic="Escape"
+  data-passenger-line="Take a breath. Slow down. This moment is yours."
+  data-field1-label="Departs"
+  data-field1-value="Whenever you're ready"
+  data-field2-label="Boarding"
+  data-field2-value="Now"
+  data-field3-label="Duration"
+  data-field3-value="As long as you need"
+  data-stub-label="Gate"
+  data-stub-gate="Awareness"
+  data-stub-seat="1A"
+  data-cta-text="Begin boarding"
+  data-cta-href="#journal"
+  data-hint="Tear along the line. Your escape begins below."
+>
+  <div class="ticket">
+    <div class="ticket-main">
+      <div class="airline-row">
+        <span class="airline-mark"><span class="glyph">✈</span><span id="h-airline"></span></span>
+        <span class="class-tag" id="h-class"></span>
+      </div>
+
+      <div class="route">
+        <span class="route-from" id="h-from"></span>
+        <span class="route-arrow">→</span>
+        <span class="route-to" id="h-to"></span>
+      </div>
+
+      <h1 class="destination" id="h-destination"></h1>
+      <p class="passenger-line" id="h-passenger"></p>
+
+      <div class="ticket-fields">
+        <div class="field">
+          <p class="stamp-label" id="h-f1-label"></p>
+          <p class="value" id="h-f1-value"></p>
+        </div>
+        <div class="field">
+          <p class="stamp-label" id="h-f2-label"></p>
+          <p class="value" id="h-f2-value"></p>
+        </div>
+        <div class="field">
+          <p class="stamp-label" id="h-f3-label"></p>
+          <p class="value" id="h-f3-value"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="ticket-stub">
+      <div class="stub-top">
+        <p class="stamp-label" id="h-stub-label"></p>
+        <p class="stub-gate" id="h-stub-gate"></p>
+        <div class="stub-divider"></div>
+        <p class="stamp-label stub-seat-label">Seat</p>
+        <p class="stub-seat" id="h-stub-seat"></p>
+      </div>
+      <a class="boarding-cta" id="h-cta" href="#journal"></a>
+    </div>
+  </div>
+</section>
+<p class="hero-hint" id="h-hint" style="padding: 0 1.25rem;"></p>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 2 — JOURNAL / DECLARATION CARD
+     Edit DECLARATION_ITEMS in the script below.
+═══════════════════════════════════════════════════════════ -->
+<section id="journal">
+  <div class="declaration">
+    <div class="declaration-header">
+      <div>
+        <p class="stamp-label">Declaration of</p>
+        <h2 class="declaration-title">Awareness</h2>
+      </div>
+      <p class="declaration-formno">FORM SE-01<br>NOTHING TO HIDE,<br>ONLY TO NOTICE</p>
+    </div>
+    <p class="declaration-intro">What are you carrying with you today? Declare it here.</p>
+    <div id="declaration-items"></div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 3 — PORTS OF CALL (cards)
+     Edit PORTS array in the script below.
+═══════════════════════════════════════════════════════════ -->
+<section id="ports">
+  <p class="ports-eyebrow">Layovers on the way to calm</p>
+  <h2 class="ports-title">Ports of Call</h2>
+  <div class="ports-grid" id="ports-grid"></div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 4 — ARRIVALS BOARD (closing)
+     Edit ARRIVALS config in the script below.
+═══════════════════════════════════════════════════════════ -->
+<section id="arrivals">
+  <p class="arrivals-eyebrow">Now arriving</p>
+  <h2 class="arrivals-title">You've landed</h2>
+  <div class="arrivals-board" id="arrivals-board"></div>
+  <p class="arrivals-tagline" id="arrivals-tagline"></p>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     ✏️  CONTENT CONFIGURATION — edit everything here
+═══════════════════════════════════════════════════════════ -->
+<script>
+
+/* SECTION 2: declaration / journal prompts */
+const DECLARATION_ITEMS = [
+  "What am I feeling most strongly today?",
+  "What has been repeatedly asking for my attention?",
+  "Where am I rushing through life instead of experiencing it?",
+  "What would change if I gave myself permission to pause?",
+  "What am I becoming aware of in this season of my life?",
+];
+
+/* SECTION 3: ports of call / cards */
+const PORTS = [
+  { name: "Paradise", code: "PRD · SHORE LEAVE", stamp: "🌴", prompt: "Where can I choose joy today?" },
+  { name: "Starry",   code: "STR · NIGHT PORT",  stamp: "⭐", prompt: "What dream am I ready to give attention to?" },
+  { name: "Turtle",   code: "TRT · SLOW BAY",    stamp: "🐢", prompt: "Where do I need to slow down and breathe?" },
+];
+
+/* SECTION 4: arrivals board / closing reflection */
+const ARRIVALS = {
+  tagline: "Today, simply observe. Breathe. And trust what is being revealed to you.",
+  rows: [
+    { status: "GATE A", text: "Awareness isn't about fixing yourself. It's about noticing." },
+    { status: "GATE B", text: "Noticing your thoughts.", list: true },
+    { status: "",        text: "Noticing your feelings.", list: true },
+    { status: "",        text: "Noticing your patterns.", list: true },
+    { status: "GATE C", text: "What you become aware of, you can begin to intentionally shape." },
+  ],
+};
+
+
+/* ══════════════════════════════════════════════════════════════
+   RENDER ENGINE — no need to edit below this line
+   ══════════════════════════════════════════════════════════════ */
+
+(function renderHero() {
+  const s = document.getElementById('hero');
+  const g = k => s.dataset[k] || '';
+  document.getElementById('h-airline').textContent = g('airline');
+  document.getElementById('h-class').textContent = g('class');
+  document.getElementById('h-from').textContent = g('from');
+  document.getElementById('h-to').textContent = g('to');
+  document.getElementById('h-destination').innerHTML =
+    g('destinationPlain') + ' <em>' + g('destinationItalic') + '</em>';
+  document.getElementById('h-passenger').textContent = g('passengerLine');
+  document.getElementById('h-f1-label').textContent = g('field1Label');
+  document.getElementById('h-f1-value').textContent = g('field1Value');
+  document.getElementById('h-f2-label').textContent = g('field2Label');
+  document.getElementById('h-f2-value').textContent = g('field2Value');
+  document.getElementById('h-f3-label').textContent = g('field3Label');
+  document.getElementById('h-f3-value').textContent = g('field3Value');
+  document.getElementById('h-stub-label').textContent = g('stubLabel');
+  document.getElementById('h-stub-gate').textContent = g('stubGate');
+  document.getElementById('h-stub-seat').textContent = g('stubSeat');
+  document.getElementById('h-cta').textContent = g('ctaText');
+  document.getElementById('h-cta').href = g('ctaHref') || '#';
+  document.getElementById('h-hint').textContent = g('hint');
+})();
+
+(function renderDeclaration() {
+  const container = document.getElementById('declaration-items');
+  DECLARATION_ITEMS.forEach((text, i) => {
+    const row = document.createElement('div');
+    row.className = 'declare-row';
+    row.innerHTML = `
+      <span class="declare-num">${String(i + 1).padStart(2, '0')}</span>
+      <p>${text}</p>
+      <span class="declare-line"></span>
+    `;
+    container.appendChild(row);
+  });
+})();
+
+(function renderPorts() {
+  const grid = document.getElementById('ports-grid');
+  PORTS.forEach(port => {
+    const card = document.createElement('div');
+    card.className = 'port-card';
+    card.innerHTML = `
+      <div class="port-stamp">${port.stamp}</div>
+      <p class="port-name">${port.name}</p>
+      <p class="port-code">${port.code}</p>
+      <p class="port-prompt">${port.prompt}</p>
+      <div class="port-fill-line"></div>
+    `;
+    grid.appendChild(card);
+  });
+})();
+
+(function renderArrivals() {
+  document.getElementById('arrivals-tagline').textContent = ARRIVALS.tagline;
+  const board = document.getElementById('arrivals-board');
+  ARRIVALS.rows.forEach(row => {
+    const r = document.createElement('div');
+    r.className = 'arrivals-row';
+    r.innerHTML = `
+      <span class="arrivals-status">${row.status}</span>
+      <span class="arrivals-text${row.list ? ' list-item' : ''}">${row.text}</span>
+    `;
+    board.appendChild(r);
+  });
+})();
+
+</script>
+</body>
+</html>

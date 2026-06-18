@@ -10,7 +10,7 @@
 <script type="importmap">
 {
   "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
   }
 }
 </script>
@@ -832,8 +832,8 @@ const ARRIVALS = {
    driftRange — how far it wanders from center, in plane-units
    zoom       — overscan factor so drifting never reveals an edge */
 const LIVING_BG_CONFIG = {
-  imagePath: 'images/landscape-bg.jpg',
-  opacity: 0.2,
+  imagePath: 'images/landscape-bg.jpg',  // lives at sweetsecret/images/landscape-bg.jpg
+  opacity: 1,                              // CSS on #bg-canvas handles the 20% — don't double-apply
   driftSpeed: 0.04,
   driftRange: 0.12,
   zoom: 1.25,

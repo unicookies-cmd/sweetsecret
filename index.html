@@ -429,8 +429,8 @@ section, .hero-hint { position: relative; z-index: 2; }
 .port-card:nth-child(3) { --tilt: -0.6deg; }
 
 .port-stamp {
-  width: 64px;
-  height: 64px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   border: 2px solid var(--coral);
   display: flex;
@@ -440,7 +440,11 @@ section, .hero-hint { position: relative; z-index: 2; }
   margin-bottom: 0.9rem;
   color: var(--coral-deep);
   background: var(--tan);
+  overflow: hidden;
+  flex-shrink: 0;
 }
+/* SVG stamps inside the circle — sized by the SVG's own style attr */
+.port-stamp svg { display: block; }
 .port-name {
   font-family: var(--font-display);
   font-weight: 600;
@@ -548,6 +552,45 @@ section, .hero-hint { position: relative; z-index: 2; }
 
 
 /* ══════════════════════════════════════════════════════════════
+   TEAR LINE — perforated separator between hero and journal
+   ══════════════════════════════════════════════════════════════ */
+.tear-line {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0.6rem 0;
+  max-width: 780px;
+  margin: 0 auto;
+  overflow: visible;
+}
+.tear-dashes {
+  flex: 1;
+  height: 0;
+  border-top: 2px dashed var(--gold-pale);
+}
+.tear-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.scissors-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--gold);
+  flex-shrink: 0;
+  transform: rotate(-45deg);
+}
+
+
+/* ══════════════════════════════════════════════════════════════
    RESPONSIVE
    ══════════════════════════════════════════════════════════════ */
 @media (max-width: 620px) {
@@ -599,7 +642,7 @@ section, .hero-hint { position: relative; z-index: 2; }
   data-stub-label="Gate"
   data-stub-gate="UNI8"
   data-stub-seat="1A"
-  data-cta-text="Begin boarding"
+  data-cta-text="Begin Boarding"
   data-cta-href="#journal"
   data-hint="Tear along the line. Your escape begins below."
 >
@@ -647,7 +690,20 @@ section, .hero-hint { position: relative; z-index: 2; }
     </div>
   </div>
 </section>
-<p class="hero-hint" id="h-hint" style="padding: 0 1.25rem;"></p>
+<div class="tear-line" id="tear-line-wrap">
+  <div class="tear-dashes"></div>
+  <span class="tear-label">
+    <svg class="scissors-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="6" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="6" cy="18" r="3" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="8.5" y1="7.5" x2="21" y2="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="8.5" y1="13" x2="14" y2="11.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span id="h-hint"></span>
+  </span>
+  <div class="tear-dashes"></div>
+</div>
 
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -661,7 +717,7 @@ section, .hero-hint { position: relative; z-index: 2; }
         <p class="stamp-label">Declaration of</p>
         <h2 class="declaration-title">Awareness</h2>
       </div>
-      <p class="declaration-formno">FORM SE-01<br>NOTHING TO HIDE,<br>ONLY TO NOTICE</p>
+      <p class="declaration-formno">FORM SELF-01<br>NOTE APP.<br>PEN IN HAND.<br>EXPRESS YOUR TRUTH.</p>
     </div>
     <p class="declaration-intro">What are you carrying with you today? Declare it here.</p>
     <div id="declaration-items"></div>
@@ -675,7 +731,7 @@ section, .hero-hint { position: relative; z-index: 2; }
 ═══════════════════════════════════════════════════════════ -->
 <section id="ports">
   <p class="ports-eyebrow">Layovers on the way to calm</p>
-  <h2 class="ports-title">Ports of Call</h2>
+  <h2 class="ports-title">Waypoints</h2>
   <div class="ports-grid" id="ports-grid"></div>
 </section>
 
@@ -706,11 +762,55 @@ const DECLARATION_ITEMS = [
   "What am I becoming aware of in this season of my life?",
 ];
 
-/* SECTION 3: ports of call / cards */
+/* SECTION 3: waypoints / cards
+   stamp can be an emoji OR an SVG string — renderer handles both */
 const PORTS = [
-  { name: "Paradise", code: "PRD · SHORE LEAVE", stamp: "🌴", prompt: "Where can I choose joy today?" },
-  { name: "Starry",   code: "STR · NIGHT PORT",  stamp: "⭐", prompt: "What dream am I ready to give attention to?" },
-  { name: "Turtle",   code: "TRT · SLOW BAY",    stamp: "🐢", prompt: "Where do I need to slow down and breathe?" },
+  {
+    name: "Paradise",
+    code: "PRD · WHEELS UP",
+    stamp: "🌴",
+    prompt: "Where can I choose joy today?",
+  },
+  {
+    name: "Starry",
+    code: "STR · CLOUD NINE",
+    // Hand-drawn style SVG star
+    stamp: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:36px;height:36px;">
+      <polygon points="24,4 29.5,17.5 44,18.5 33.5,28 37,42 24,34 11,42 14.5,28 4,18.5 18.5,17.5"
+        fill="#e8c84a" stroke="#c98f3a" stroke-width="1.5" stroke-linejoin="round"/>
+      <polygon points="24,10 28,20 38.5,20.5 30.5,27.5 33,38 24,32.5 15,38 17.5,27.5 9.5,20.5 20,20"
+        fill="#f5e07a" opacity="0.5"/>
+    </svg>`,
+    prompt: "What dream am I ready to give attention to?",
+  },
+  {
+    name: "Turtle",
+    code: "TRT · CRUISING ALTITUDE",
+    stamp: `<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:38px;height:38px;">
+      <!-- Shell body -->
+      <ellipse cx="24" cy="25" rx="13" ry="11" fill="#6aaa6a" stroke="#3a7a3a" stroke-width="1.4"/>
+      <!-- Shell pattern -->
+      <ellipse cx="24" cy="24" rx="6" ry="5" fill="#4a8a4a" opacity="0.6"/>
+      <ellipse cx="17" cy="21" rx="3.5" ry="3" fill="#4a8a4a" opacity="0.5"/>
+      <ellipse cx="31" cy="21" rx="3.5" ry="3" fill="#4a8a4a" opacity="0.5"/>
+      <ellipse cx="18" cy="30" rx="3" ry="2.5" fill="#4a8a4a" opacity="0.5"/>
+      <ellipse cx="30" cy="30" rx="3" ry="2.5" fill="#4a8a4a" opacity="0.5"/>
+      <!-- Head -->
+      <ellipse cx="24" cy="13" rx="5" ry="4.5" fill="#7aba6a" stroke="#3a7a3a" stroke-width="1.2"/>
+      <!-- Eyes -->
+      <circle cx="22" cy="12" r="1" fill="#2a4a2a"/>
+      <circle cx="26" cy="12" r="1" fill="#2a4a2a"/>
+      <!-- Front legs -->
+      <ellipse cx="11" cy="22" rx="3.5" ry="2.2" fill="#7aba6a" stroke="#3a7a3a" stroke-width="1.2" transform="rotate(-20 11 22)"/>
+      <ellipse cx="37" cy="22" rx="3.5" ry="2.2" fill="#7aba6a" stroke="#3a7a3a" stroke-width="1.2" transform="rotate(20 37 22)"/>
+      <!-- Back legs -->
+      <ellipse cx="13" cy="33" rx="3.2" ry="2" fill="#7aba6a" stroke="#3a7a3a" stroke-width="1.2" transform="rotate(20 13 33)"/>
+      <ellipse cx="35" cy="33" rx="3.2" ry="2" fill="#7aba6a" stroke="#3a7a3a" stroke-width="1.2" transform="rotate(-20 35 33)"/>
+      <!-- Tail -->
+      <ellipse cx="24" cy="36.5" rx="2" ry="3" fill="#7aba6a" stroke="#3a7a3a" stroke-width="1.2"/>
+    </svg>`,
+    prompt: "Where do I need to slow down and breathe?",
+  },
 ];
 
 /* SECTION 4: arrivals board / closing reflection */

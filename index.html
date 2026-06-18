@@ -7,6 +7,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Mono:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
 <style>
 
 /* ══════════════════════════════════════════════════════════════
@@ -40,8 +47,57 @@ body {
   background: var(--paper-shadow);
   color: var(--ink);
   line-height: 1.6;
+  position: relative;
 }
 img { max-width: 100%; display: block; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   LIVING BACKGROUND — fixed Three.js canvas + gradient handoff
+   The canvas renders the autumn-landscape image as a slowly
+   drifting plane at low opacity, sitting behind every section.
+   The gradient on top eases the page's cream/paper palette over
+   the photographic image so the two aesthetics don't clash.
+   ══════════════════════════════════════════════════════════════ */
+#bg-canvas-wrap {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--paper-shadow); /* fallback while WebGL/texture loads */
+}
+#bg-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0.2; /* the "low opac" the living layer sits at */
+}
+#bg-gradient {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  pointer-events: none;
+  /* Top of the page eases from clear (showing the living image)
+     down into the site's own cream paper tone, so content sections
+     read clearly against paper rather than photo. */
+  background: linear-gradient(
+    180deg,
+    rgba(252,246,238,0.15) 0%,
+    rgba(252,246,238,0.55) 18%,
+    rgba(242,232,216,0.88) 38%,
+    var(--paper-shadow) 60%,
+    var(--paper-shadow) 100%
+  );
+}
+
+/* Every section needs to sit above the fixed background layers */
+section, .hero-hint { position: relative; z-index: 2; }
 
 .wrap { max-width: 760px; margin: 0 auto; padding: 0 1.25rem; }
 
@@ -78,7 +134,7 @@ img { max-width: 100%; display: block; }
    via data-* attributes below, or restyle the .ticket card itself.
    ══════════════════════════════════════════════════════════════ */
 #hero {
-  background: linear-gradient(180deg, #f7e0d2 0%, var(--paper-shadow) 55%);
+  background: linear-gradient(180deg, rgba(247,224,210,0.35) 0%, rgba(242,232,216,0.7) 55%, var(--paper-shadow) 100%);
   padding: clamp(2.5rem, 6vw, 5rem) 1.25rem;
   display: flex;
   justify-content: center;
@@ -510,11 +566,24 @@ img { max-width: 100%; display: block; }
 <body>
 
 <!-- ═══════════════════════════════════════════════════════════
+     LIVING BACKGROUND
+     A Three.js plane textured with the autumn-landscape image,
+     drifting slowly, sitting at 20% opacity behind every section.
+     The gradient div eases it into the page's cream palette.
+     Config: see LIVING_BG_CONFIG in the script block at the
+     bottom of this file (image path, opacity, drift speed).
+═══════════════════════════════════════════════════════════ -->
+<div id="bg-canvas-wrap">
+  <canvas id="bg-canvas"></canvas>
+</div>
+<div id="bg-gradient"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
      SECTION 1 — HERO / BOARDING PASS
      Edit copy via data-* attributes below.
 ═══════════════════════════════════════════════════════════ -->
 <section id="hero"
-  data-airline="UniCookies Air"
+  data-airline="Sweet Escape Air"
   data-class="First Class · Awareness"
   data-from="HERE"
   data-to="NOW"
@@ -528,7 +597,7 @@ img { max-width: 100%; display: block; }
   data-field3-label="Duration"
   data-field3-value="As long as you need"
   data-stub-label="Gate"
-  data-stub-gate="UNI8"
+  data-stub-gate="Awareness"
   data-stub-seat="1A"
   data-cta-text="Begin boarding"
   data-cta-href="#journal"
@@ -656,6 +725,24 @@ const ARRIVALS = {
   ],
 };
 
+/* LIVING BACKGROUND: the Three.js drifting image layer.
+   imagePath  — texture shown behind the whole page
+   opacity    — how strongly it reads through the gradient (0–1)
+   driftSpeed — how fast the plane wanders, higher = faster
+   driftRange — how far it wanders from center, in plane-units
+   zoom       — overscan factor so drifting never reveals an edge */
+const LIVING_BG_CONFIG = {
+  imagePath: 'images/landscape-bg.jpg',
+  opacity: 0.2,
+  driftSpeed: 0.04,
+  driftRange: 0.12,
+  zoom: 1.25,
+};
+// Explicitly exposed on window: classic-script const/let bindings aren't
+// reliably visible to a separate type="module" script in every engine,
+// so the living-background module reads window.LIVING_BG_CONFIG instead.
+window.LIVING_BG_CONFIG = LIVING_BG_CONFIG;
+
 
 /* ══════════════════════════════════════════════════════════════
    RENDER ENGINE — no need to edit below this line
@@ -730,5 +817,106 @@ const ARRIVALS = {
 })();
 
 </script>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     LIVING BACKGROUND — Three.js scene
+     A single textured plane, slowly drifting (sine-wave pan),
+     rendered at LIVING_BG_CONFIG.opacity behind the whole page.
+     This is a module script so it can `import` Three.js directly
+     from the CDN — no bundler needed.
+     If WebGL is unavailable, it fails silently and the page is
+     left on its plain paper-tone fallback background.
+═══════════════════════════════════════════════════════════ -->
+<script type="module">
+import * as THREE from 'three';
+
+function initLivingBackground(config) {
+  const wrap = document.getElementById('bg-canvas-wrap');
+  const canvas = document.getElementById('bg-canvas');
+  if (!wrap || !canvas) return;
+
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+    });
+  } catch (e) {
+    // WebGL not supported — leave the static fallback background in place.
+    return;
+  }
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
+  camera.position.z = 1;
+
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+  const loader = new THREE.TextureLoader();
+  loader.load(
+    config.imagePath,
+    (texture) => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+
+      // Plane is oversized (config.zoom) so the slow drift never
+      // exposes an edge of the texture.
+      const geometry = new THREE.PlaneGeometry(2 * config.zoom, 2 * config.zoom);
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        opacity: config.opacity,
+        depthWrite: false,
+        depthTest: false,
+      });
+      const plane = new THREE.Mesh(geometry, material);
+      scene.add(plane);
+
+      const clock = new THREE.Clock();
+
+      function resize() {
+        const w = wrap.clientWidth;
+        const h = wrap.clientHeight;
+        renderer.setSize(w, h, false);
+
+        // Cover-fit the texture against the viewport aspect ratio,
+        // same logic as CSS background-size: cover.
+        const imgAspect = texture.image.width / texture.image.height;
+        const viewAspect = w / h;
+        if (viewAspect > imgAspect) {
+          plane.scale.set(1, imgAspect / viewAspect, 1);
+        } else {
+          plane.scale.set(viewAspect / imgAspect, 1, 1);
+        }
+      }
+
+      function animate() {
+        const t = clock.getElapsedTime() * config.driftSpeed;
+        // Slow lissajous-style drift: gentle, non-repeating-feeling
+        // wander rather than an obvious back-and-forth pan.
+        plane.position.x = Math.sin(t) * config.driftRange;
+        plane.position.y = Math.sin(t * 0.7) * config.driftRange * 0.6;
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      animate();
+    },
+    undefined,
+    () => {
+      // Image failed to load — keep the static fallback background.
+    }
+  );
+}
+
+initLivingBackground(window.LIVING_BG_CONFIG);
+</script>
+
 </body>
 </html>

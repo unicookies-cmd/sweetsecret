@@ -53,11 +53,9 @@ img { max-width: 100%; display: block; }
 
 
 /* ══════════════════════════════════════════════════════════════
-   LIVING BACKGROUND — fixed Three.js canvas + gradient handoff
-   The canvas renders the autumn-landscape image as a slowly
-   drifting plane at low opacity, sitting behind every section.
-   The gradient on top eases the page's cream/paper palette over
-   the photographic image so the two aesthetics don't clash.
+   LIVING BACKGROUND — parallax Three.js canvas
+   Canvas moves at 40% of scroll speed creating true parallax.
+   Opacity raised so it shows through frosted sections.
    ══════════════════════════════════════════════════════════════ */
 #bg-canvas-wrap {
   position: fixed;
@@ -66,7 +64,7 @@ img { max-width: 100%; display: block; }
   height: 100vh;
   z-index: 0;
   overflow: hidden;
-  background: var(--paper-shadow); /* fallback while WebGL/texture loads */
+  background: var(--paper-shadow);
 }
 #bg-canvas {
   position: absolute;
@@ -74,30 +72,12 @@ img { max-width: 100%; display: block; }
   width: 100%;
   height: 100%;
   display: block;
-  opacity: 0.2; /* the "low opac" the living layer sits at */
+  opacity: 0.55;
 }
-#bg-gradient {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 1;
-  pointer-events: none;
-  /* Top of the page eases from clear (showing the living image)
-     down into the site's own cream paper tone, so content sections
-     read clearly against paper rather than photo. */
-  background: linear-gradient(
-    180deg,
-    rgba(252,246,238,0.15) 0%,
-    rgba(252,246,238,0.55) 18%,
-    rgba(242,232,216,0.88) 38%,
-    var(--paper-shadow) 60%,
-    var(--paper-shadow) 100%
-  );
-}
+/* gradient overlay removed — sections now handle their own transparency */
 
 /* Every section needs to sit above the fixed background layers */
-section, .hero-hint { position: relative; z-index: 2; }
+section, .hero-hint, .tear-line { position: relative; z-index: 2; }
 
 .wrap { max-width: 760px; margin: 0 auto; padding: 0 1.25rem; }
 
@@ -130,11 +110,11 @@ section, .hero-hint { position: relative; z-index: 2; }
 
 /* ══════════════════════════════════════════════════════════════
    SECTION 1 — HERO  /  THE BOARDING PASS
-   This is the signature element: a literal ticket. Edit content
-   via data-* attributes below, or restyle the .ticket card itself.
+   Transparent background — image shows fully around the ticket.
+   Ticket card itself stays opaque paper so it reads as a document.
    ══════════════════════════════════════════════════════════════ */
 #hero {
-  background: linear-gradient(180deg, rgba(247,224,210,0.35) 0%, rgba(242,232,216,0.7) 55%, var(--paper-shadow) 100%);
+  background: transparent;
   padding: clamp(2.5rem, 6vw, 5rem) 1.25rem;
   display: flex;
   justify-content: center;
@@ -145,7 +125,8 @@ section, .hero-hint { position: relative; z-index: 2; }
   max-width: 680px;
   background: var(--paper);
   border-radius: 14px;
-  box-shadow: 0 18px 40px -20px rgba(58,46,42,0.35);
+  border: 1.5px solid var(--gold);
+  box-shadow: 0 24px 60px -16px rgba(58,46,42,0.45), 0 0 0 4px rgba(201,143,58,0.12);
   display: grid;
   grid-template-columns: 1fr 200px;
   overflow: hidden;
@@ -304,11 +285,12 @@ section, .hero-hint { position: relative; z-index: 2; }
 
 /* ══════════════════════════════════════════════════════════════
    SECTION 2 — JOURNAL  /  IN-FLIGHT DECLARATION CARD
-   Styled like the little card tucked in a seat pocket — what are
-   you carrying with you, what are you declaring as you travel.
+   Frosted glass — landscape bleeds softly through the section.
    ══════════════════════════════════════════════════════════════ */
 #journal {
-  background: var(--paper-shadow);
+  background: rgba(252,246,238,0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   padding: clamp(3rem, 6vw, 5rem) 1.25rem;
 }
 .declaration {
@@ -380,12 +362,13 @@ section, .hero-hint { position: relative; z-index: 2; }
 
 
 /* ══════════════════════════════════════════════════════════════
-   SECTION 3 — CARDS  /  PASSPORT STAMPS (ports of call)
-   Three layovers in the Sweet Escape itinerary. Each one is a
-   stamped destination rather than a generic content card.
+   SECTION 3 — WAYPOINTS  /  FROSTED GLASS
+   Warm tan frost — picks up the golden tones in the landscape.
    ══════════════════════════════════════════════════════════════ */
 #ports {
-  background: linear-gradient(180deg, var(--paper-shadow) 0%, #f4e9d6 100%);
+  background: rgba(244,233,214,0.70);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   padding: clamp(3rem, 6vw, 4.5rem) 1.25rem;
 }
 .ports-eyebrow {
@@ -475,14 +458,17 @@ section, .hero-hint { position: relative; z-index: 2; }
 
 
 /* ══════════════════════════════════════════════════════════════
-   SECTION 4 — CLOSING  /  ARRIVALS BOARD
-   You've landed. Framed as an arrivals/baggage-claim moment —
-   the journey's destination was always just noticing.
+   SECTION 4 — ARRIVALS  /  FULL-BLEED LANDSCAPE FOOTER
+   Dark overlay strengthened to 0.85 to keep text legible over
+   the vivid illustrated landscape palette.
    ══════════════════════════════════════════════════════════════ */
 #arrivals {
-  background: var(--ink);
+  position: relative;
   color: var(--paper);
   padding: clamp(3rem, 6vw, 5rem) 1.25rem 3.5rem;
+  background:
+    linear-gradient(180deg, rgba(28,22,18,0.82) 0%, rgba(28,22,18,0.92) 100%),
+    url('images/landscape-bg.jpg') center 60% / cover no-repeat;
 }
 .arrivals-eyebrow {
   text-align: center;
@@ -619,7 +605,6 @@ section, .hero-hint { position: relative; z-index: 2; }
 <div id="bg-canvas-wrap">
   <canvas id="bg-canvas"></canvas>
 </div>
-<div id="bg-gradient"></div>
 
 <!-- ═══════════════════════════════════════════════════════════
      SECTION 1 — HERO / BOARDING PASS
@@ -995,10 +980,16 @@ function initLivingBackground(config) {
 
       function animate() {
         const t = clock.getElapsedTime() * config.driftSpeed;
-        // Slow lissajous-style drift: gentle, non-repeating-feeling
-        // wander rather than an obvious back-and-forth pan.
+
+        // Scroll parallax: move the plane at 40% of page scroll speed.
+        // scrollY is in px; normalise against page height so the offset
+        // is a fraction of the plane's coordinate space (-1 to 1).
+        const scrollFraction = window.scrollY / (document.body.scrollHeight - window.innerHeight || 1);
+        const parallaxY = (scrollFraction - 0.5) * 0.6; // shift ±0.3 units across full scroll
+
+        // Combine slow drift + scroll parallax
         plane.position.x = Math.sin(t) * config.driftRange;
-        plane.position.y = Math.sin(t * 0.7) * config.driftRange * 0.6;
+        plane.position.y = Math.sin(t * 0.7) * config.driftRange * 0.6 - parallaxY;
 
         renderer.render(scene, camera);
         requestAnimationFrame(animate);

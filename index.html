@@ -520,6 +520,98 @@ section, .hero-hint, .tear-line { position: relative; z-index: 2; }
 
 
 /* ══════════════════════════════════════════════════════════════
+   GUIDED MEDITATION PLAYER — boarding-pass styled audio strip
+   ══════════════════════════════════════════════════════════════ */
+.audio-strip {
+  position: relative;
+  z-index: 2;
+  max-width: 680px;
+  margin: 0 auto 0.5rem;
+  padding: 0 1.25rem;
+}
+.audio-strip-inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--paper);
+  border: 1.5px solid var(--gold-pale);
+  border-radius: 999px;
+  padding: 0.65rem 1.25rem 0.65rem 0.65rem;
+  box-shadow: 0 8px 24px -14px rgba(58,46,42,0.3);
+}
+.audio-play-btn {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--coral);
+  color: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.audio-play-btn:hover { background: var(--coral-deep); transform: scale(1.04); }
+.audio-play-btn svg { width: 18px; height: 18px; }
+.audio-play-btn #icon-play { margin-left: 2px; } /* optical centering for play triangle */
+
+.audio-meta {
+  flex-shrink: 0;
+  min-width: 110px;
+}
+.audio-eyebrow {
+  font-family: var(--font-data);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 0.1rem;
+}
+.audio-title {
+  font-family: var(--font-script);
+  font-style: italic;
+  font-size: 0.98rem;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.audio-progress-wrap {
+  flex: 1;
+  min-width: 0;
+}
+.audio-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--tan);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.audio-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--coral);
+  border-radius: 999px;
+  transition: width 0.1s linear;
+}
+.audio-times {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.3rem;
+  font-family: var(--font-data);
+  font-size: 0.65rem;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 480px) {
+  .audio-meta { display: none; } /* keep the strip compact on small screens */
+}
+
+
+/* ══════════════════════════════════════════════════════════════
    TEAR LINE — perforated separator between hero and journal
    ══════════════════════════════════════════════════════════════ */
 .tear-line {
@@ -672,6 +764,46 @@ section, .hero-hint, .tear-line { position: relative; z-index: 2; }
   <div class="tear-dashes"></div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════
+     GUIDED MEDITATION PLAYER
+     Sits right under the tear line — this is what you're
+     "boarding" into. Styled like a boarding-pass audio strip:
+     play button doubles as a plane-window dial.
+     Swap the file via AUDIO_CONFIG in the script block below.
+═══════════════════════════════════════════════════════════ -->
+<div class="audio-strip">
+  <div class="audio-strip-inner">
+    <button class="audio-play-btn" id="audio-play-btn" type="button" aria-label="Play guided meditation">
+      <svg id="icon-play" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="6,4 20,12 6,20" fill="currentColor"/>
+      </svg>
+      <svg id="icon-pause" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none;">
+        <rect x="5" y="4" width="5" height="16" rx="1" fill="currentColor"/>
+        <rect x="14" y="4" width="5" height="16" rx="1" fill="currentColor"/>
+      </svg>
+    </button>
+
+    <div class="audio-meta">
+      <p class="audio-eyebrow" id="audio-eyebrow"></p>
+      <p class="audio-title" id="audio-title"></p>
+    </div>
+
+    <div class="audio-progress-wrap">
+      <div class="audio-progress-track" id="audio-progress-track">
+        <div class="audio-progress-fill" id="audio-progress-fill"></div>
+      </div>
+      <div class="audio-times">
+        <span id="audio-current-time">0:00</span>
+        <span id="audio-duration">--:--</span>
+      </div>
+    </div>
+  </div>
+  <audio id="audio-element" preload="none">
+    <source src="audio/meditation.mp3" type="audio/mpeg" />
+    Your browser doesn't support inline audio — you can still download the meditation track directly.
+  </audio>
+</div>
+
 
 <!-- ═══════════════════════════════════════════════════════════
      SECTION 2 — JOURNAL / DECLARATION CARD
@@ -719,6 +851,16 @@ section, .hero-hint, .tear-line { position: relative; z-index: 2; }
      ✏️  CONTENT CONFIGURATION — edit everything here
 ═══════════════════════════════════════════════════════════ -->
 <script>
+
+/* AUDIO PLAYER: the guided meditation under the tear line.
+   src      — path to the mp3 (relative to index.html)
+   eyebrow  — small label above the title
+   title    — track name shown in the player */
+const AUDIO_CONFIG = {
+  src: 'audio/meditation.mp3',
+  eyebrow: 'Now Playing',
+  title: 'Guided Meditation',
+};
 
 /* SECTION 2: declaration / journal prompts */
 const DECLARATION_ITEMS = [
@@ -837,6 +979,77 @@ window.LIVING_BG_CONFIG = LIVING_BG_CONFIG;
   document.getElementById('h-cta').textContent = g('ctaText');
   document.getElementById('h-cta').href = g('ctaHref') || '#';
   document.getElementById('h-hint').textContent = g('hint');
+})();
+
+(function renderAudioPlayer() {
+  const audio = document.getElementById('audio-element');
+  const playBtn = document.getElementById('audio-play-btn');
+  const iconPlay = document.getElementById('icon-play');
+  const iconPause = document.getElementById('icon-pause');
+  const progressTrack = document.getElementById('audio-progress-track');
+  const progressFill = document.getElementById('audio-progress-fill');
+  const currentTimeEl = document.getElementById('audio-current-time');
+  const durationEl = document.getElementById('audio-duration');
+  if (!audio || !playBtn) return;
+
+  // Apply config — set the audio source and labels from AUDIO_CONFIG
+  // so the whole player is editable from one object up top.
+  const source = audio.querySelector('source');
+  if (source) source.src = AUDIO_CONFIG.src;
+  document.getElementById('audio-eyebrow').textContent = AUDIO_CONFIG.eyebrow;
+  document.getElementById('audio-title').textContent = AUDIO_CONFIG.title;
+
+  function formatTime(seconds) {
+    if (!isFinite(seconds)) return '--:--';
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  playBtn.addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
+  });
+
+  audio.addEventListener('play', () => {
+    iconPlay.style.display = 'none';
+    iconPause.style.display = 'block';
+    playBtn.setAttribute('aria-label', 'Pause guided meditation');
+  });
+
+  audio.addEventListener('pause', () => {
+    iconPlay.style.display = 'block';
+    iconPause.style.display = 'none';
+    playBtn.setAttribute('aria-label', 'Play guided meditation');
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    durationEl.textContent = formatTime(audio.duration);
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      const pct = (audio.currentTime / audio.duration) * 100;
+      progressFill.style.width = pct + '%';
+      currentTimeEl.textContent = formatTime(audio.currentTime);
+    }
+  });
+
+  audio.addEventListener('ended', () => {
+    iconPlay.style.display = 'block';
+    iconPause.style.display = 'none';
+  });
+
+  // Click-to-seek on the progress track
+  progressTrack.addEventListener('click', (e) => {
+    if (!audio.duration) return;
+    const rect = progressTrack.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    audio.currentTime = pct * audio.duration;
+  });
 })();
 
 (function renderDeclaration() {
